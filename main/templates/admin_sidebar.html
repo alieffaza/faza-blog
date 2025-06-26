@@ -1,0 +1,35 @@
+<style>
+  .admin-sidebar {
+    min-height: 80vh;
+    position: sticky;
+    top: 90px;
+    background: transparent;
+    border-radius: 16px;
+    padding: 32px 0 24px 0;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  }
+  .admin-sidebar .list-group-item {
+    background: transparent;
+    color: #fff;
+    font-weight: 500;
+    border: none;
+    padding: 16px 28px;
+    transition: background 0.2s, color 0.2s;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .admin-sidebar .list-group-item.active, .admin-sidebar .list-group-item:hover {
+    background: #2dce89;
+    color: #171941;
+    font-weight: 700;
+  }
+</style>
+<div class="admin-sidebar p-0">
+  <div class="list-group mb-4">
+    <a href="{% url 'admin_dashboard' %}" class="list-group-item list-group-item-action {% if request.path == '/admin-dashboard/' %}active{% endif %}">Dashboard</a>
+    <a href="{% url 'admin_users' %}" class="list-group-item list-group-item-action {% if request.path == '/admin-dashboard/users/' %}active{% endif %}">User</a>
+    <a href="{% url 'admin_artikels' %}" class="list-group-item list-group-item-action {% if request.path == '/admin-dashboard/artikels/' %}active{% endif %}">Artikel</a>
+    <a href="{% url 'admin_categories' %}" class="list-group-item list-group-item-action {% if request.path == '/admin-dashboard/categories/' %}active{% endif %}">Kategori</a>
+  </div>
+</div> 

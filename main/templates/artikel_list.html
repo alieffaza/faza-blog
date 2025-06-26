@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Daftar Artikel - Faza Blog{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="text-center mb-4 mt-5 text-white">Daftar Artikel</h2>
+  <div class="row">
+    {% for artikel in artikel %}
+    <div class="col-md-6 mb-4">
+      <div class="card bg-transparent text-white shadow">
+        <div class="card-body">
+          <h4 class="card-title text-white">{{ artikel.judul }}</h4>
+          <p class="card-text text-muted mb-2">Tanggal: {{ artikel.tanggal }}</p>
+          <p class="card-text">{{ artikel.isi|truncatewords:30 }}</p>
+          <a href="{% url 'detail_artikel' artikel.id %}" class="btn btn-primary btn-sm">Baca Selengkapnya</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center text-muted">Belum ada artikel.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Penulis - Faza Blog{% endblock %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-md-2">
+      <div class="list-group mb-4">
+        <a href="#" class="list-group-item list-group-item-action active">Artikel Saya</a>
+        <a href="#" class="list-group-item list-group-item-action">Tambah Artikel</a>
+      </div>
+    </div>
+    <div class="col-md-10">
+      <h2 class="mb-4">Dashboard Penulis</h2>
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Total Artikel</h5>
+              <p class="card-text display-4">{{ artikels|length }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">Daftar Artikel Saya</div>
+        <div class="card-body p-0">
+          <table class="table mb-0">
+            <thead><tr><th>Judul</th><th>Tanggal</th></tr></thead>
+            <tbody>
+              {% for artikel in artikels %}
+              <tr>
+                <td>{{ artikel.judul }}</td>
+                <td>{{ artikel.tanggal }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

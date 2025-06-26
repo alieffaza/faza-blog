@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ artikel.judul }} - Faza Blog{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="content-center">
+    <div class="container">
+      <div class="row align-items-center text-left">
+        <div class="col-lg-8 col-md-10 col-12 ml-auto mr-auto">
+          <h2 class="title mb-4">{{ artikel.judul }}</h2>
+          <p class="text-muted mb-2">Tanggal: {{ artikel.tanggal }}</p>
+          <div class="mb-4">{{ artikel.isi|linebreaks }}</div>
+          <a href="/artikel/" class="btn btn-secondary mb-4">Kembali</a>
+
+          <div class="card bg-transparent shadow mb-4">
+            <div class="card-body">
+              <h4 class="card-title text-white mb-3">Komentar</h4>
+              {% if komentar_list %}
+                {% for komentar in komentar_list %}
+                  <div class="mb-3 p-3 rounded bg-dark text-white">
+                    <div class="d-flex align-items-center mb-1">
+                      <span class="font-weight-bold">{{ komentar.user.username }}</span>
+                      <span class="ml-2 text-muted" style="font-size:13px;">{{ komentar.tanggal|date:"d M Y H:i" }}</span>
+                    </div>
+                    <div>{{ komentar.isi|linebreaks }}</div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="text-muted">Belum ada komentar.</div>
+              {% endif %}
+
+              {% if user.is_authenticated %}
+              <form method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="isi" class="text-white">Tulis Komentar</label>
+                  <textarea name="isi" id="isi" rows="3" class="form-control bg-dark text-white" placeholder="Tulis komentar Anda..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Kirim Komentar</button>
+              </form>
+              {% else %}
+                <div class="alert alert-info mt-4">Anda harus <a href="{% url 'login' %}" class="text-success">login</a> untuk menulis komentar.</div>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

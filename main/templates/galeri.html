@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Galeri Foto - Faza Blog{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="text-center mb-4 mt-5 text-white">Galeri Foto</h2>
+  <div class="row">
+    {% for i in "123456" %}
+    <div class="col-md-4 mb-4">
+      <div class="card bg-transparent text-white shadow">
+        <img src="https://source.unsplash.com/400x300/?nature,water,{{ i }}" class="card-img-top" alt="Foto Galeri {{ i }}">
+        <div class="card-body">
+          <h5 class="card-title text-white">Foto {{ i }}</h5>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %} 
