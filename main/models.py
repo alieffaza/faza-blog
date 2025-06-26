@@ -1,11 +1,13 @@
 from django.db import models
+from ckeditor_uploader.fields import RichTextUploadingField
 
 # Create your models here.
 
 class Artikel(models.Model):
     judul = models.CharField(max_length=200)
-    isi = models.TextField()
+    isi = RichTextUploadingField()
     tanggal = models.DateField(auto_now_add=True)
+    gambar_judul = models.ImageField(upload_to='artikel_images/', null=True, blank=True)
 
     def __str__(self):
         return self.judul

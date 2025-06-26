@@ -1,19 +1,29 @@
 {% extends "base.html" %}
 {% block title %}Galeri Foto - Faza Blog{% endblock %}
 {% block content %}
-<div class="container py-5">
-  <h2 class="text-center mb-4 mt-5 text-white">Galeri Foto</h2>
-  <div class="row">
-    {% for i in "123456" %}
-    <div class="col-md-4 mb-4">
-      <div class="card bg-transparent text-white shadow">
-        <img src="https://source.unsplash.com/400x300/?nature,water,{{ i }}" class="card-img-top" alt="Foto Galeri {{ i }}">
-        <div class="card-body">
-          <h5 class="card-title text-white">Foto {{ i }}</h5>
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center mb-5">
+                <h2 class="title">Galeri</h2>
+                <h4 class="description">Kumpulan foto dari artikel saya</h4>
+            </div>
         </div>
-      </div>
+        <div class="row justify-content-center">
+            {% for article in articles %}
+            <div class="col-lg-4 col-md-6 col-12 mb-4">
+                <a href="{% url 'detail_artikel' article.pk %}">
+                  <div style="position:relative;width:100%;padding-top:56.25%;overflow:hidden;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.13);">
+                    <img src="{{ article.gambar_judul.url }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" class="img-fluid" alt="Gambar Artikel">
+                  </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <h4>Belum ada gambar artikel yang tersedia.</h4>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-    {% endfor %}
-  </div>
 </div>
 {% endblock %} 

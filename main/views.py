@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Artikel, Category
+from .models import Artikel, Category, Komentar
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.contrib.auth.decorators import login_required
@@ -8,19 +8,23 @@ from django import forms
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+import os
+from urllib.parse import urlencode
+from jose import jwt
+import requests
+from django.conf import settings
 
 # Create your views here.
 
 def index(request):
     artikels = Artikel.objects.all()
     artikel_terbaru = Artikel.objects.order_by('-tanggal')[:3]
-    galeri_peek = [
-        f'https://source.unsplash.com/400x300/?nature,water,{i}' for i in range(1, 7)
-    ]
+    articles = Artikel.objects.exclude(gambar_judul='').exclude(gambar_judul=None)
     return render(request, 'index.html', {
         'artikels': artikels,
         'artikel_terbaru': artikel_terbaru,
-        'galeri_peek': galeri_peek,
+        'articles': articles,
     })
 
 def daftar_artikel(request):
@@ -47,30 +51,74 @@ def tentang(request):
     return render(request, 'tentang.html')
 
 def galeri(request):
-    return render(request, 'galeri.html')
+    # Get all articles that have title images
+    articles_with_images = Artikel.objects.exclude(gambar_judul='').exclude(gambar_judul=None)
+    return render(request, 'galeri.html', {'articles': articles_with_images})
 
-class LoginForm(AuthenticationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Nama Pengguna'})
-        self.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Kata Sandi'})
+User = get_user_model()
 
 class RegisterForm(UserCreationForm):
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
+    nama_lengkap = forms.CharField(label='Nama Lengkap', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama Lengkap'}))
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Nama Pengguna'})
+        self.fields.pop('username', None)
         self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Kata Sandi'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Ulangi Kata Sandi'})
 
+    class Meta:
+        model = User
+        fields = ['nama_lengkap', 'email', 'password1', 'password2']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Email sudah digunakan.')
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        nama_lengkap = self.cleaned_data['nama_lengkap']
+        parts = nama_lengkap.strip().split(' ', 1)
+        user.first_name = parts[0]
+        user.last_name = parts[1] if len(parts) > 1 else ''
+        user.username = user.email  # gunakan email sebagai username
+        if commit:
+            user.save()
+        return user
+
+class EmailLoginForm(forms.Form):
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
+    password = forms.CharField(label='Kata Sandi', widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Kata Sandi'}))
+
+    def clean(self):
+        email = self.cleaned_data.get('email')
+        password = self.cleaned_data.get('password')
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise forms.ValidationError('Email atau password salah.')
+            from django.contrib.auth import authenticate
+            user = authenticate(username=user.username, password=password)
+            if user is None:
+                raise forms.ValidationError('Email atau password salah.')
+            self.user = user
+        return self.cleaned_data
+    def get_user(self):
+        return getattr(self, 'user', None)
+
 def login_view(request):
     if request.method == 'POST':
-        form = LoginForm(request, data=request.POST)
+        form = EmailLoginForm(request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             return redirect('dashboard')
     else:
-        form = LoginForm()
+        form = EmailLoginForm()
     return render(request, 'login.html', {'form': form})
 
 def register_view(request):
@@ -106,6 +154,14 @@ def penulis_dashboard(request):
 
 @login_required(login_url='login')
 def user_profile(request):
+    if request.method == 'POST':
+        nama_lengkap = request.POST.get('nama_lengkap', '').strip()
+        if nama_lengkap:
+            parts = nama_lengkap.split(' ', 1)
+            request.user.first_name = parts[0]
+            request.user.last_name = parts[1] if len(parts) > 1 else ''
+            request.user.save()
+            messages.success(request, 'Nama berhasil diperbarui.')
     return render(request, 'user_profile.html')
 
 def logout_view(request):
@@ -185,14 +241,15 @@ def admin_users(request):
 class ArtikelForm(forms.ModelForm):
     class Meta:
         model = Artikel
-        fields = ['judul', 'isi']
+        fields = ['judul', 'isi', 'gambar_judul']
         widgets = {
             'judul': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Judul Artikel'}),
-            'isi': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Isi Artikel', 'rows': 4}),
+            'gambar_judul': forms.FileInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'judul': 'Judul',
             'isi': 'Isi',
+            'gambar_judul': 'Gambar Judul',
         }
 
 @login_required(login_url='login')
@@ -209,14 +266,14 @@ def admin_artikels(request):
         edit_form = ArtikelForm(instance=artikel)
     if request.method == 'POST':
         if 'add' in request.POST:
-            form = ArtikelForm(request.POST)
+            form = ArtikelForm(request.POST, request.FILES)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Artikel berhasil ditambahkan.')
                 return redirect('admin_artikels')
         elif 'edit' in request.POST:
             artikel = get_object_or_404(Artikel, id=request.POST.get('edit_id'))
-            edit_form = ArtikelForm(request.POST, instance=artikel)
+            edit_form = ArtikelForm(request.POST, request.FILES, instance=artikel)
             if edit_form.is_valid():
                 edit_form.save()
                 messages.success(request, 'Artikel berhasil diubah.')
@@ -271,3 +328,87 @@ def admin_categories(request):
             messages.success(request, 'Kategori berhasil dihapus.')
             return redirect('admin_categories')
     return render(request, 'admin_categories.html', {'categories': categories, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
+
+class KomentarForm(forms.ModelForm):
+    class Meta:
+        model = Komentar
+        fields = ['artikel', 'user', 'isi']
+        widgets = {
+            'artikel': forms.Select(attrs={'class': 'form-control'}),
+            'user': forms.Select(attrs={'class': 'form-control'}),
+            'isi': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Isi Komentar'}),
+        }
+        labels = {
+            'artikel': 'Artikel',
+            'user': 'User',
+            'isi': 'Isi Komentar',
+        }
+
+@login_required(login_url='login')
+def admin_komentar(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden()
+    komentars = Komentar.objects.select_related('artikel', 'user').all()
+    form = None
+    edit_form = None
+    add_mode = request.GET.get('add') == '1'
+    edit_id = request.GET.get('edit')
+    if add_mode:
+        form = KomentarForm()
+    if edit_id:
+        komentar = get_object_or_404(Komentar, id=edit_id)
+        edit_form = KomentarForm(instance=komentar)
+    if request.method == 'POST':
+        if 'add' in request.POST:
+            form = KomentarForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Komentar berhasil ditambahkan.')
+                return redirect('admin_komentar')
+        elif 'edit' in request.POST:
+            komentar = get_object_or_404(Komentar, id=request.POST.get('edit_id'))
+            edit_form = KomentarForm(request.POST, instance=komentar)
+            if edit_form.is_valid():
+                edit_form.save()
+                messages.success(request, 'Komentar berhasil diubah.')
+                return redirect('admin_komentar')
+        elif 'delete' in request.POST:
+            komentar = get_object_or_404(Komentar, id=request.POST.get('delete_id'))
+            komentar.delete()
+            messages.success(request, 'Komentar berhasil dihapus.')
+            return redirect('admin_komentar')
+    return render(request, 'admin_komentar.html', {'komentars': komentars, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
+
+def auth0_login(request):
+    params = {
+        'client_id': settings.AUTH0_CLIENT_ID,
+        'response_type': 'code',
+        'redirect_uri': settings.AUTH0_CALLBACK_URL,
+        'scope': 'openid profile email',
+        'audience': f'https://{settings.AUTH0_DOMAIN}/userinfo',
+    }
+    return redirect(f'https://{settings.AUTH0_DOMAIN}/authorize?' + urlencode(params))
+
+def auth0_callback(request):
+    code = request.GET.get('code')
+    token_url = f'https://{settings.AUTH0_DOMAIN}/oauth/token'
+    token_data = {
+        'grant_type': 'authorization_code',
+        'client_id': settings.AUTH0_CLIENT_ID,
+        'client_secret': settings.AUTH0_CLIENT_SECRET,
+        'code': code,
+        'redirect_uri': settings.AUTH0_CALLBACK_URL,
+    }
+    token_headers = {'content-type': 'application/x-www-form-urlencoded'}
+    token_response = requests.post(token_url, data=token_data, headers=token_headers)
+    tokens = token_response.json()
+    id_token = tokens.get('id_token')
+    userinfo_url = f'https://{settings.AUTH0_DOMAIN}/userinfo'
+    userinfo_response = requests.get(userinfo_url, headers={'Authorization': f'Bearer {tokens.get("access_token")}'})
+    userinfo = userinfo_response.json()
+    request.session['user'] = userinfo
+    return redirect('/')
+
+def auth0_logout(request):
+    request.session.flush()
+    return redirect(f'https://{settings.AUTH0_DOMAIN}/v2/logout?client_id={settings.AUTH0_CLIENT_ID}&returnTo=http://localhost:8000/')

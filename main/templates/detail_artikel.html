@@ -1,51 +1,51 @@
 {% extends "base.html" %}
 {% block title %}{{ artikel.judul }} - Faza Blog{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="content-center">
+<div class="section py-4" style="margin-top: 90px;">
     <div class="container">
-      <div class="row align-items-center text-left">
-        <div class="col-lg-8 col-md-10 col-12 ml-auto mr-auto">
-          <h2 class="title mb-4">{{ artikel.judul }}</h2>
-          <p class="text-muted mb-2">Tanggal: {{ artikel.tanggal }}</p>
-          <div class="mb-4">{{ artikel.isi|linebreaks }}</div>
-          <a href="/artikel/" class="btn btn-secondary mb-4">Kembali</a>
-
-          <div class="card bg-transparent shadow mb-4">
-            <div class="card-body">
-              <h4 class="card-title text-white mb-3">Komentar</h4>
-              {% if komentar_list %}
-                {% for komentar in komentar_list %}
-                  <div class="mb-3 p-3 rounded bg-dark text-white">
-                    <div class="d-flex align-items-center mb-1">
-                      <span class="font-weight-bold">{{ komentar.user.username }}</span>
-                      <span class="ml-2 text-muted" style="font-size:13px;">{{ komentar.tanggal|date:"d M Y H:i" }}</span>
+        <div class="row justify-content-center">
+            <div class="col-lg-9 col-md-10">
+                <div class="card shadow-lg border-0">
+                    {% if artikel.gambar_judul %}
+                    <div class="w-100 d-flex justify-content-center align-items-center mb-1">
+                        <div style="position:relative;width:100%;height:0;padding-top:56.25%;overflow:hidden;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.13);max-width:100%;">
+                            <img src="{{ artikel.gambar_judul.url }}" alt="{{ artikel.judul }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;max-width:100%;" class="img-fluid mx-auto d-block">
+                        </div>
                     </div>
-                    <div>{{ komentar.isi|linebreaks }}</div>
-                  </div>
-                {% endfor %}
-              {% else %}
-                <div class="text-muted">Belum ada komentar.</div>
-              {% endif %}
-
-              {% if user.is_authenticated %}
-              <form method="post" class="mt-4">
-                {% csrf_token %}
-                <div class="form-group">
-                  <label for="isi" class="text-white">Tulis Komentar</label>
-                  <textarea name="isi" id="isi" rows="3" class="form-control bg-dark text-white" placeholder="Tulis komentar Anda..." required></textarea>
+                    {% endif %}
+                    <div class="card-body p-4">
+                        <h2 class="card-title text-center font-weight-bold mb-3">{{ artikel.judul }}</h2>
+                        <p class="text-muted text-center mb-4">{{ artikel.tanggal|date:"d F Y" }}</p>
+                        <div class="card-text mb-4" style="font-size:1.1rem;">
+                            {{ artikel.isi|safe }}
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Kirim Komentar</button>
-              </form>
-              {% else %}
-                <div class="alert alert-info mt-4">Anda harus <a href="{% url 'login' %}" class="text-success">login</a> untuk menulis komentar.</div>
-              {% endif %}
-            </div>
-          </div>
 
+                <!-- Komentar Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h4 class="mb-4">Komentar</h4>
+                        <!-- Disqus Comment Section -->
+                        <div id="disqus_thread"></div>
+                        <script>
+                        var disqus_config = function () {
+                          this.page.url = "{{ request.build_absolute_uri }}";
+                          this.page.identifier = "artikel-{{ artikel.pk }}";
+                        };
+                        (function() {
+                          var d = document, s = d.createElement('script');
+                          s.src = 'https://fazablog-1.disqus.com/embed.js';
+                          s.setAttribute('data-timestamp', +new Date());
+                          (d.head || d.body).appendChild(s);
+                        })();
+                        </script>
+                        <noscript>Aktifkan JavaScript untuk melihat komentar Disqus.</noscript>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
-{% endblock %} 
+{% endblock %}
+<script id="dsq-count-scr" src="//fazablog-1.disqus.com/count.js" async></script> 

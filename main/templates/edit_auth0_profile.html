@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Edit Profil - Faza Blog{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow border-0 rounded-lg">
+        <div class="card-body p-4">
+          <h3 class="mb-3 text-center font-weight-bold">Edit Profil</h3>
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+          <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="name">Nama</label>
+              <input type="text" class="form-control" id="name" name="name" value="{{ user.name|default:user.nickname }}">
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+            </div>
+            <button type="submit" class="btn btn-success btn-block font-weight-bold">Simpan Perubahan</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

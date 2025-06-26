@@ -33,12 +33,34 @@
         background: rgba(255, 255, 255, 0.1);
         border-radius: 0.4285rem;
       }
+      html, body {
+        overflow-y: scroll;
+        scrollbar-width: none; /* Firefox */
+      }
+      html::-webkit-scrollbar, body::-webkit-scrollbar {
+        display: none;
+      }
+      .navbar {
+        background: rgba(20, 21, 40, 0.98) !important;
+        transition: background 0.3s;
+        padding-top: 0.85rem;
+        padding-bottom: 0.85rem;
+      }
+      .navbar .navbar-brand, .navbar .nav-link {
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+      }
+      .navbar.scrolled {
+        background: #18192f !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      }
     </style>
   </head>
 
   <body class="about-us">
     <nav
       class="navbar navbar-expand-lg navbar-transparent fixed-top"
+      id="mainNavbar"
     >
       <div class="container">
         <a class="navbar-brand text-white" href="{% url 'index' %}"
@@ -67,31 +89,34 @@
               <a class="nav-link text-white {% if request.path == '/tentang/' %}active{% endif %}" href="{% url 'tentang' %}">Tentang</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link text-white {% if request.path == '/galeri/' %}active{% endif %}" href="{% url 'galeri' %}">Galeri</a>
+              <a class="nav-link text-white {% if request.path == '/artikel/' %}active{% endif %}" href="{% url 'daftar_artikel' %}">Artikel</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link text-white {% if request.path == '/artikel/' %}active{% endif %}" href="{% url 'daftar_artikel' %}">Artikel</a>
+              <a class="nav-link text-white {% if request.path == '/galeri/' %}active{% endif %}" href="{% url 'galeri' %}">Galeri</a>
             </li>
             {% if user.is_authenticated %}
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle text-white {% if request.path == '/dashboard/' %}active{% endif %}" href="#" id="navbarProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                {{ user.username }}
+                {{ user.get_full_name|default:user.first_name|default:user.email }}
               </a>
               <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarProfile">
-                <a class="dropdown-item" href="{% url 'dashboard' %}">Dashboard</a>
+                <a class="dropdown-item" href="{% url 'edit_auth0_profile' %}">Edit Profile</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
               </div>
             </li>
-            {% else %}
+            {% elif request.session.user %}
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle text-white {% if request.path == '/login/' or request.path == '/register/' %}active{% endif %}" href="#" id="navbarProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Login
+              <a class="nav-link dropdown-toggle text-white" href="#" id="navbarProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ request.session.user.name|default:request.session.user.email }}
               </a>
               <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarProfile">
-                <a class="dropdown-item" href="{% url 'login' %}">Login</a>
-                <a class="dropdown-item" href="{% url 'register' %}">Register</a>
+                <a class="dropdown-item" href="/auth/logout/">Logout</a>
               </div>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="btn btn-success font-weight-bold px-4 py-2 ml-2" style="color:#fff;" href="/auth/login/">Login</a>
             </li>
             {% endif %}
           </ul>
@@ -117,5 +142,15 @@
     <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
     <script src="{% static 'assets/js/plugins/perfect-scrollbar.jquery.min.js' %}"></script>
     <script src="{% static 'assets/js/blk-design-system-pro.min.js?v=1.0.0' %}"></script>
+    <script>
+      window.addEventListener('scroll', function() {
+        var navbar = document.getElementById('mainNavbar');
+        if (window.scrollY > 20) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+    </script>
   </body>
 </html>

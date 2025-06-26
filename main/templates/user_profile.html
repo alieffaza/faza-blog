@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Profil Saya - Faza Blog{% endblock %}
+{% block title %}Edit Data Diri - Faza Blog{% endblock %}
 {% block content %}
 <style>
   .profile-card {
@@ -14,8 +14,7 @@
     color: #fff;
     font-weight: 500;
   }
-  .profile-card input[type="text"],
-  .profile-card input[type="email"] {
+  .profile-card input[type="text"] {
     background: #23244a;
     color: #fff;
     border: 1px solid #2dce89;
@@ -24,8 +23,7 @@
     width: 100%;
     margin-bottom: 16px;
   }
-  .profile-card input[type="text"]:focus,
-  .profile-card input[type="email"]:focus {
+  .profile-card input[type="text"]:focus {
     border-color: #2dce89;
     box-shadow: 0 0 0 2px #2dce8933;
     outline: none;
@@ -35,16 +33,12 @@
   <div class="row justify-content-center">
     <div class="col-md-7 col-lg-6">
       <div class="profile-card">
-        <h2 class="mb-4">Profil Saya</h2>
+        <h2 class="mb-4">Edit Data Diri</h2>
         <form method="post">
           {% csrf_token %}
           <div class="form-group mb-3">
-            <label for="id_username">Nama Pengguna</label>
-            <input type="text" id="id_username" name="username" value="{{ request.user.username }}" required>
-          </div>
-          <div class="form-group mb-4">
-            <label for="id_email">Email</label>
-            <input type="email" id="id_email" name="email" value="{{ request.user.email }}" readonly>
+            <label for="id_nama">Nama Lengkap</label>
+            <input type="text" id="id_nama" name="nama_lengkap" value="{{ request.user.get_full_name }}" required>
           </div>
           <button type="submit" class="btn btn-success">Simpan Perubahan</button>
         </form>
