@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Halaman Tidak Ditemukan</title>
+  <style>
+    body {
+      min-height: 100vh;
+      background: #1e203c;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', Arial, sans-serif;
+    }
+    .error-center {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: center;
+      color: #fff;
+      padding: 2rem 1rem;
+    }
+    .error-center h1 {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #e14eca;
+      margin-bottom: 0.5rem;
+      margin-top: -1rem;
+    }
+    .error-center h2 {
+      font-size: 1.7rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    .error-center p {
+      color: #bbb;
+      margin-bottom: 2rem;
+    }
+    .btn-info {
+      background: #1d8cf8;
+      color: #fff;
+      border: none;
+      border-radius: 0.4285rem;
+      padding: 0.75rem 2.2rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    }
+    .btn-info:hover {
+      background: #0666c2;
+    }
+    @media (max-width: 600px) {
+      .error-center h1 { font-size: 2.5rem; }
+      .error-center h2 { font-size: 1.1rem; }
+      .btn-info { font-size: 1rem; padding: 0.7rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="error-center">
+    <h1>404</h1>
+    <h2>Halaman Tidak Ditemukan</h2>
+    <p>Maaf, halaman yang Anda cari tidak tersedia atau sudah dipindahkan.</p>
+    <button class="btn-info" onclick="window.location.href='https://alieffazaumkt.pythonanywhere.com/'">Kembali ke Beranda</button>
+  </div>
+</body>
+</html>

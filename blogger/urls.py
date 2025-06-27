@@ -27,4 +27,9 @@ urlpatterns = [
     path('auth/callback/', views.auth0_callback, name='auth0_callback'),
     path('auth/logout/', views.auth0_logout, name='auth0_logout'),
     path('tag/<str:tag_name>/', views.artikel_by_tag, name='artikel_by_tag'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)   
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler400 = 'main.views.custom_bad_request'
+handler403 = 'main.views.custom_permission_denied'
+handler404 = 'main.views.custom_page_not_found'
+handler500 = 'main.views.custom_server_error'   
