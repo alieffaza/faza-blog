@@ -41,6 +41,28 @@
       html::-webkit-scrollbar, body::-webkit-scrollbar {
         display: none;
       }
+      /* Animasi Fade Down dan Fade Up */
+      @keyframes fadeDown {
+        0% { opacity: 0; transform: translateY(-32px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(32px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fadeOutUp {
+        0% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(32px); }
+      }
+      .fade-down {
+        animation: fadeDown 0.7s cubic-bezier(0.4,0,0.2,1) both;
+      }
+      .fade-up {
+        animation: fadeUp 0.7s cubic-bezier(0.4,0,0.2,1) both;
+      }
+      .fade-out-up {
+        animation: fadeOutUp 0.5s cubic-bezier(0.4,0,0.2,1) both;
+      }
       .navbar {
         background: rgba(20, 21, 40, 0.98) !important;
         transition: background 0.3s;
@@ -55,12 +77,88 @@
         background: #18192f !important;
         box-shadow: 0 2px 12px rgba(0,0,0,0.12);
       }
+      /* Responsive Navbar & Footer */
+      @media (max-width: 991.98px) {
+        .navbar .navbar-collapse {
+          background: #18192f !important;
+          border-radius: 0 0 12px 12px;
+          margin-top: 0.5rem;
+        }
+        .navbar .navbar-nav {
+          align-items: flex-start !important;
+        }
+        .navbar .nav-item {
+          width: 100%;
+        }
+        .navbar .nav-link, .navbar .btn {
+          width: 100%;
+          text-align: left;
+          margin-bottom: 0.5rem;
+        }
+        .navbar .dropdown-menu {
+          position: static;
+          float: none;
+        }
+      }
+      @media (max-width: 767.98px) {
+        .footer .row {
+          flex-direction: column;
+          text-align: center;
+        }
+        .footer .col-md-6 {
+          text-align: center !important;
+          margin-bottom: 0.5rem;
+        }
+        .footer .col-md-6.text-right {
+          text-align: center !important;
+          margin-top: 0.5rem;
+          margin-left: 0;
+        }
+        .footer .col-md-6.text-left {
+          margin-bottom: 1rem;
+          margin-right: 0;
+        }
+        .footer .col-md-6.text-left p {
+          margin-bottom: 1.2rem;
+        }
+        .footer .col-md-6.text-right a {
+          margin-top: 0.5rem;
+        }
+      }
+      /* Reset margin pada desktop */
+      @media (min-width: 768px) {
+        .footer .col-md-6.text-right {
+          margin-left: 0;
+          margin-top: 0;
+        }
+        .footer .col-md-6.text-left {
+          margin-right: 0;
+          margin-bottom: 0;
+        }
+        .footer .col-md-6.text-left p {
+          margin-bottom: 0;
+        }
+      }
+      .navbar .nav-link, .navbar .navbar-brand {
+        padding-left: 0.75rem !important;
+      }
+      .fade-anim {
+        transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1), visibility 0.5s cubic-bezier(0.4,0,0.2,1);
+      }
+      #turnToTopBtn {
+        opacity: 0;
+        visibility: hidden;
+      }
+      #turnToTopBtn.show {
+        opacity: 1;
+        visibility: visible;
+      }
     </style>
   </head>
 
   <body class="about-us">
     <nav
-      class="navbar navbar-expand-lg navbar-transparent fixed-top"
+      class="navbar navbar-expand-lg navbar-transparent fixed-top fade-down"
       id="mainNavbar"
     >
       <div class="container">
@@ -134,7 +232,7 @@
     </nav>
 
     <div class="wrapper">{% block content %}{% endblock %}</div>
-    <footer class="footer">
+    <footer class="footer fade-up">
       <div class="container">
         <div class="row align-items-center">
           <div class="col-md-6 text-left">
@@ -149,8 +247,8 @@
       </div>
     </footer>
 
-    <div id="turnToTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'});" style="position:fixed;bottom:32px;right:32px;z-index:999;display:flex;align-items:center;justify-content:center;width:48px;height:48px;background:#6c757d;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.10);border:none;cursor:pointer;">
-      <i class="fa fa-arrow-up" style="color:#fff;font-size:1.3rem;"></i>
+    <div id="turnToTopBtn" class="fade-anim" onclick="window.scrollTo({top:0,behavior:'smooth'});" style="position:fixed;bottom:32px;right:32px;z-index:999;display:flex;align-items:center;justify-content:center;width:48px;height:48px;background:#6c757d;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.10);border:none;cursor:pointer;">
+      <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;"><i class="fa fa-arrow-up" style="color:#fff;font-size:1.3rem;"></i></span>
     </div>
     <script>
       window.addEventListener('scroll', function() {
@@ -162,9 +260,14 @@
         }
       });
 
+      // Animasi show/hide scroll to top
       window.addEventListener('scroll', function() {
         var btn = document.getElementById('turnToTopBtn');
-        if(window.scrollY > 100) { btn.style.display = 'flex'; } else { btn.style.display = 'none'; }
+        if(window.scrollY > 100) {
+          btn.classList.add('show');
+        } else {
+          btn.classList.remove('show');
+        }
       });
     </script>
     <!-- Bootstrap JS and jQuery for dropdown -->

@@ -32,6 +32,9 @@ Faza Blog adalah platform blog modern berbasis Django dengan fitur lengkap, tamp
   - Tombol share artikel ke WhatsApp, Twitter, Facebook
 - **Admin Panel**
   - Kelola user, artikel, kategori, tag
+- **Optimasi Performa**
+  - Caching view dan template (otomatis cache halaman dan template untuk akses lebih cepat)
+  - Optimasi file statis dengan WhiteNoise (serving static files lebih efisien, siap untuk deployment production)
 
 ## Library & API yang Digunakan
 - **Django**: Framework utama backend dan ORM.
@@ -44,6 +47,7 @@ Faza Blog adalah platform blog modern berbasis Django dengan fitur lengkap, tamp
 - **Pillow**: Pengelolaan gambar (upload gambar artikel).
 - **CKEditor**: Rich text editor untuk isi artikel.
 - **SQLite**: Database default (bisa diganti PostgreSQL/MySQL).
+- **WhiteNoise**: Serving dan kompresi file statis secara efisien, siap untuk deployment production.
 
 ## Fitur Lain
 - **Artikel Terkait**: Otomatis berdasarkan tag.
