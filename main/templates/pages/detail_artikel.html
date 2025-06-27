@@ -1,115 +1,178 @@
 {% extends "pages/base.html" %}
+{% load static %}           
 {% block title %}{{ artikel.judul }} - Faza Blog{% endblock %}
 {% block content %}
-<div class="section py-4" style="margin-top: 90px;">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-12 col-xl-10">
-                <div class="card shadow-lg border-0">
-                    {% if artikel.gambar_judul %}
-                    <div class="w-100 d-flex justify-content-center align-items-center mb-1">
-                        <div style="position:relative;width:100%;height:0;padding-top:56.25%;overflow:hidden;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.13);max-width:100%;">
-                            <img src="{{ artikel.gambar_judul.url }}" alt="{{ artikel.judul }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;max-width:100%;" class="img-fluid mx-auto d-block">
+<div id="main-content-fade" class="fade-up">
+    <div class="section py-4" style="margin-top: 90px;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-xl-10">
+                    <div class="card shadow-lg border-0">
+                        {% if artikel.gambar_judul %}
+                        <div class="w-100 d-flex justify-content-center align-items-center mb-1">
+                            <div style="position:relative;width:100%;height:0;padding-top:56.25%;overflow:hidden;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.13);max-width:100%;">
+                                <img src="{{ artikel.gambar_judul.url }}" alt="{{ artikel.judul }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;max-width:100%;" class="img-fluid mx-auto d-block">
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="w-100 d-flex justify-content-center align-items-center mb-1">
+                            <div style="position:relative;width:100%;height:0;padding-top:56.25%;overflow:hidden;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.13);max-width:100%;">
+                                <img src="{% static 'assets/img/default.jpg' %}" alt="{{ artikel.judul }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;max-width:100%;" class="img-fluid mx-auto d-block">
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="card-body p-4">
+                            <h2 class="card-title text-center font-weight-bold mb-3">{{ artikel.judul }}</h2>
+                            <!-- Bagikan ke Sosial Media -->
+                            <div class="share-btn-group mb-4">
+                              <a href="https://wa.me/?text={{ artikel.judul|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-success share-btn" title="Bagikan ke WhatsApp">
+                                <i class="fab fa-whatsapp"></i> <span class="share-text">WhatsApp</span>
+                              </a>
+                              <a href="https://twitter.com/intent/tweet?text={{ artikel.judul|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-info share-btn" title="Bagikan ke Twitter">
+                                <i class="fab fa-twitter"></i> <span class="share-text">Twitter</span>
+                              </a>
+                              <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-primary share-btn" title="Bagikan ke Facebook">
+                                <i class="fab fa-facebook"></i> <span class="share-text">Facebook</span>
+                              </a>
+                            </div>
+                            <style>
+                            @media (max-width: 575.98px) {
+                              .share-btn-group {
+                                display: grid !important;
+                                grid-template-columns: repeat(3, 1fr);
+                                gap: 0.5rem;
+                                margin-bottom: 1rem;
+                              }
+                              .share-btn-group .btn {
+                                width: 100%;
+                                height: 36px;
+                                padding: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 1.1rem;
+                                margin: 0 !important;
+                                border-radius: 8px;
+                              }
+                              .share-btn .share-text {
+                                display: none !important;
+                              }
+                              .share-btn i {
+                                font-size: 1.2rem;
+                              }
+                            }
+                            @media (min-width: 576px) {
+                              .share-btn-group {
+                                display: flex !important;
+                                justify-content: center;
+                                gap: 0.5rem;
+                              }
+                              .share-btn-group .btn {
+                                width: auto;
+                                height: auto;
+                                margin: 0 2px 0 2px !important;
+                              }
+                            }
+                            </style>
+                            <!-- Tanggal dan Tags sejajar -->
+                            <div class="d-flex justify-content-center align-items-center mb-4 flex-wrap text-center" style="gap: 0.5rem;">
+                                <span class="text-muted" style="font-size:1rem;">{{ artikel.tanggal|date:"d F Y" }}</span>
+                                <span class="mx-2" style="color:#bbb;font-size:1.2rem;">―</span>
+                                <span>
+                                    {% for tag in artikel.tags.all %}
+                                        <span style="color:#fff;margin-right:8px;font-size:1rem;">#{{ tag.name }}</span>
+                                    {% endfor %}
+                                </span>
+                            </div>
+                            <div class="card-text mb-4" style="font-size:1.1rem;">
+                                {{ artikel.isi|safe }}
+                            </div>
+                            <!-- Navigasi artikel -->
+                            <div class="d-flex justify-content-center align-items-center mt-5 mb-3 flex-wrap gap-2">
+                                {% if prev_artikel %}
+                                <div>
+                                    <a href="{% url 'detail_artikel' prev_artikel.pk %}" class="btn btn-outline-primary">&larr; Sebelumnya</a>
+                                </div>
+                                {% endif %}
+                                <div class="mx-2">
+                                    <a href="{% url 'daftar_artikel' %}" class="btn btn-secondary">Kembali ke Daftar Artikel</a>
+                                </div>
+                                {% if next_artikel %}
+                                <div>
+                                    <a href="{% url 'detail_artikel' next_artikel.pk %}" class="btn btn-outline-primary">Selanjutnya &rarr;</a>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                    {% endif %}
-                    <div class="card-body p-4">
-                        <h2 class="card-title text-center font-weight-bold mb-3">{{ artikel.judul }}</h2>
-                        <!-- Bagikan ke Sosial Media -->
-                        <div class="d-flex justify-content-center mb-4 gap-2">
-                          <a href="https://wa.me/?text={{ artikel.judul|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-success mx-1" title="Bagikan ke WhatsApp">
-                            <i class="fab fa-whatsapp"></i> WhatsApp
-                          </a>
-                          <a href="https://twitter.com/intent/tweet?text={{ artikel.judul|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-info mx-1" title="Bagikan ke Twitter">
-                            <i class="fab fa-twitter"></i> Twitter
-                          </a>
-                          <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-primary mx-1" title="Bagikan ke Facebook">
-                            <i class="fab fa-facebook"></i> Facebook
-                          </a>
-                        </div>
-                        <!-- Tanggal dan Tags sejajar -->
-                        <div class="d-flex justify-content-center align-items-center mb-4 flex-wrap text-center" style="gap: 0.5rem;">
-                            <span class="text-muted" style="font-size:1rem;">{{ artikel.tanggal|date:"d F Y" }}</span>
-                            <span class="mx-2" style="color:#bbb;font-size:1.2rem;">―</span>
-                            <span>
-                                {% for tag in artikel.tags.all %}
-                                    <span style="color:#fff;margin-right:8px;font-size:1rem;">#{{ tag.name }}</span>
-                                {% endfor %}
-                            </span>
-                        </div>
-                        <div class="card-text mb-4" style="font-size:1.1rem;">
-                            {{ artikel.isi|safe }}
-                        </div>
-                        <!-- Navigasi artikel -->
-                        <div class="d-flex justify-content-center align-items-center mt-5 mb-3 flex-wrap gap-2">
-                            {% if prev_artikel %}
-                            <div>
-                                <a href="{% url 'detail_artikel' prev_artikel.pk %}" class="btn btn-outline-primary">&larr; Sebelumnya</a>
-                            </div>
-                            {% endif %}
-                            <div class="mx-2">
-                                <a href="{% url 'daftar_artikel' %}" class="btn btn-secondary">Kembali ke Daftar Artikel</a>
-                            </div>
-                            {% if next_artikel %}
-                            <div>
-                                <a href="{% url 'detail_artikel' next_artikel.pk %}" class="btn btn-outline-primary">Selanjutnya &rarr;</a>
-                            </div>
-                            {% endif %}
+                    <!-- Komentar Section -->
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h4 class="mb-4">Komentar</h4>
+                            <!-- Disqus Comment Section -->
+                            <div id="disqus_thread"></div>
+                            <script>
+                            var disqus_config = function () {
+                              this.page.url = "{{ request.build_absolute_uri }}";
+                              this.page.identifier = "artikel-{{ artikel.pk }}";
+                            };
+                            (function() {
+                              var d = document, s = d.createElement('script');
+                              s.src = 'https://fazablog-1.disqus.com/embed.js';
+                              s.setAttribute('data-timestamp', +new Date());
+                              (d.head || d.body).appendChild(s);
+                            })();
+                            </script>
+                            <noscript>Aktifkan JavaScript untuk melihat komentar Disqus.</noscript>
                         </div>
                     </div>
-                </div>
-                <!-- Komentar Section -->
-                <div class="card mt-4">
-                    <div class="card-body">
-                        <h4 class="mb-4">Komentar</h4>
-                        <!-- Disqus Comment Section -->
-                        <div id="disqus_thread"></div>
-                        <script>
-                        var disqus_config = function () {
-                          this.page.url = "{{ request.build_absolute_uri }}";
-                          this.page.identifier = "artikel-{{ artikel.pk }}";
-                        };
-                        (function() {
-                          var d = document, s = d.createElement('script');
-                          s.src = 'https://fazablog-1.disqus.com/embed.js';
-                          s.setAttribute('data-timestamp', +new Date());
-                          (d.head || d.body).appendChild(s);
-                        })();
-                        </script>
-                        <noscript>Aktifkan JavaScript untuk melihat komentar Disqus.</noscript>
-                    </div>
-                </div>
-                <!-- Artikel Terkait dan Populer di bawah -->
-                <div class="row mt-4">
-                    {% if related_artikels %}
-                    <div class="col-12 mb-4">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-body p-3">
-                                <h4 class="mb-4 text-center font-weight-bold" style="font-size:1.25rem;">Baca artikel lain dari {% for tag in artikel.tags.all %}#{{ tag.name }} {% endfor %}</h4>
-                                <div class="row">
-                                {% for related in related_artikels|slice:":3" %}
-                                <div class="col-md-4 col-12 mb-4">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <a href="{% url 'detail_artikel' related.pk %}" style="text-decoration:none;">
-                                            {% if related.gambar_judul %}
-                                            <img src="{{ related.gambar_judul.url }}" style="width:100%;height:140px;object-fit:cover;border-radius:12px 12px 0 0;" class="img-fluid">
-                                            {% endif %}
-                                            <div class="card-body p-2 text-center">
-                                                <h5 class="font-weight-bold mb-2" style="font-size:1.08rem;min-height:44px;color:#fff;">{{ related.judul }}</h5>
-                                            </div>
-                                        </a>
+                    <!-- Artikel Terkait dan Populer di bawah -->
+                    <div class="row mt-4">
+                        {% if related_artikels %}
+                        <div class="col-12 mb-4">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body p-3">
+                                    <h4 class="mb-4 text-center font-weight-bold" style="font-size:1.25rem;">Baca artikel lain dari {% for tag in artikel.tags.all %}#{{ tag.name }} {% endfor %}</h4>
+                                    <div class="row">
+                                    {% for related in related_artikels|slice:":3" %}
+                                    <div class="col-md-4 col-12 mb-4">
+                                        <div class="card h-100 border-0 shadow-sm">
+                                            <a href="{% url 'detail_artikel' related.pk %}" style="text-decoration:none;">
+                                                {% if related.gambar_judul %}
+                                                <img src="{{ related.gambar_judul.url }}" style="width:100%;height:140px;object-fit:cover;border-radius:12px 12px 0 0;" class="img-fluid">
+                                                {% else %}
+                                                <img src="{% static 'assets/img/default.jpg' %}" style="width:100%;height:140px;object-fit:cover;border-radius:12px 12px 0 0;" class="img-fluid">
+                                                {% endif %}
+                                                <div class="card-body p-2 text-center">
+                                                    <h5 class="font-weight-bold mb-2" style="font-size:1.08rem;min-height:44px;color:#fff;">{{ related.judul }}</h5>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
                                     </div>
                                 </div>
-                                {% endfor %}
-                                </div>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-<script id="dsq-count-scr" src="//fazablog-1.disqus.com/count.js" async></script> 
+<script id="dsq-count-scr" src="//fazablog-1.disqus.com/count.js" async></script>
+
+<style>
+  .fade-up { opacity: 0; transform: translateY(32px); transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1), transform 0.9s cubic-bezier(0.4,0,0.2,1); }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('main-content-fade');
+    window.requestAnimationFrame(function() {
+      el.classList.add('visible');
+    });
+  });
+</script> 
