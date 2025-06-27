@@ -161,4 +161,4 @@ CKEDITOR_CONFIGS = {
 AUTH0_DOMAIN = 'dev-bl2n0w4kngkr63pj.us.auth0.com'
 AUTH0_CLIENT_ID = '3Z5QB900quXKeaKvY1CWnz8O6K2xYfE9'
 AUTH0_CLIENT_SECRET = 'o8yaD___cpX00fFK3ofqrrLdDtWrwmWbBtEIcH8-dGJ7oI4EMAtfGYydRNY_Eu-g'
-AUTH0_CALLBACK_URL = 'http://localhost:8000/auth/callback'
+AUTH0_CALLBACK_URL = 'https://alieffazaumkt.pythonanywhere.com/auth/callback'
