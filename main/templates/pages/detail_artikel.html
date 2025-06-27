@@ -15,6 +15,18 @@
                     {% endif %}
                     <div class="card-body p-4">
                         <h2 class="card-title text-center font-weight-bold mb-3">{{ artikel.judul }}</h2>
+                        <!-- Bagikan ke Sosial Media -->
+                        <div class="d-flex justify-content-center mb-4 gap-2">
+                          <a href="https://wa.me/?text={{ artikel.judul|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-success mx-1" title="Bagikan ke WhatsApp">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                          </a>
+                          <a href="https://twitter.com/intent/tweet?text={{ artikel.judul|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-info mx-1" title="Bagikan ke Twitter">
+                            <i class="fab fa-twitter"></i> Twitter
+                          </a>
+                          <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-primary mx-1" title="Bagikan ke Facebook">
+                            <i class="fab fa-facebook"></i> Facebook
+                          </a>
+                        </div>
                         <!-- Tanggal dan Tags sejajar -->
                         <div class="d-flex justify-content-center align-items-center mb-4 flex-wrap text-center" style="gap: 0.5rem;">
                             <span class="text-muted" style="font-size:1rem;">{{ artikel.tanggal|date:"d F Y" }}</span>
