@@ -1,0 +1,67 @@
+{% extends "pages/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container pt-3 pb-5" style="margin-top: 55px;">
+  <div class="col-md-12 text-center mb-5">
+    <h2 class="title">Tentang Saya</h2>
+    <h4 class="description">Portofolio dan proyek yang saya kerjakan</h4>
+  </div><br><br><br>
+  <div class="row justify-content-center align-items-center mb-5">
+    <div class="col-md-3 text-center mb-4 mb-md-0">
+      <img src="{% static 'assets/img/profile.jpeg' %}" alt="Foto Profil" class="rounded-circle shadow" style="width: 140px; height: 140px; object-fit: cover; border: 4px solid #fff;">
+    </div>
+    <div class="col-md-7 text-center text-md-left">
+      <h2 class="text-white font-weight-bold mb-2">Alief Faza Rizqi Adi Jaya</h2>
+      <h5 class="text-primary mb-3">Freelance Web Developer & Mahasiswa Informatika UMKT</h5>
+      <p class="text-white-50 mb-3">Saya adalah pengembang web yang berfokus pada pembuatan aplikasi modern, responsif, dan mudah digunakan. Berpengalaman di Django, Python, dan front-end modern. Aktif mengembangkan proyek open source dan selalu belajar teknologi baru.</p>
+      <div class="mb-2">
+        <span class="badge badge-info mr-1 mb-1">HTML</span>
+        <span class="badge badge-info mr-1 mb-1">CSS</span>
+        <span class="badge badge-info mr-1 mb-1">JavaScript</span>
+        <span class="badge badge-info mr-1 mb-1">Python</span>
+        <span class="badge badge-info mr-1 mb-1">PHP</span>
+        <span class="badge badge-info mr-1 mb-1">Laravel</span>
+        <span class="badge badge-info mr-1 mb-1">Django</span>
+        <span class="badge badge-info mr-1 mb-1">React</span>
+        <span class="badge badge-info mr-1 mb-1">Vue JS</span> 
+      </div>
+    </div>
+  </div><br><br><br>
+
+  <div class="col-md-12 text-center mt-5">
+    <h2 class="title">Proyek Saya</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="card bg-transparent shadow text-white h-100">
+        <div class="card-body">
+          <h5 class="card-title text-white">Aplikasi Blog Django</h5>
+          <p class="card-text">Platform blog modern dengan fitur admin, CRUD, dan autentikasi. Menggunakan Django, Bootstrap, dan dark theme.</p>
+          <span class="badge badge-info mb-1">Django</span>
+          <span class="badge badge-info mb-1">BLK template</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card bg-transparent shadow text-white h-100">
+        <div class="card-body">
+          <h5 class="card-title text-white">SPK Pemilihan Jurusan</h5>
+          <p class="card-text">Website Sistem Pendukung Keputusan (SPK) untuk membantu mahasiswa UMKT memilih peminatan yang sesuai.</p>
+          <span class="badge badge-info mb-1">PHP</span>
+          <span class="badge badge-info mb-1">Bootstrap Admin Template</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card bg-transparent shadow text-white h-100">
+        <div class="card-body">
+          <h5 class="card-title text-white">OctaKlinik Mobile App</h5>
+          <p class="card-text">Aplikasi mobile untuk membantu pengguna dalam membuat janji medis dan melihat status janji medis.</p>
+          <span class="badge badge-info mb-1">React Native</span>
+          <span class="badge badge-info mb-1">Supabase</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><br><br><br><br><br>
+{% endblock %}

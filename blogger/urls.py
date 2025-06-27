@@ -3,7 +3,6 @@ from django.urls import path, include
 from main import views
 from django.conf import settings
 from django.conf.urls.static import static
-from main.views_auth0 import edit_auth0_profile
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -11,7 +10,7 @@ urlpatterns = [
     path('tentang/', views.tentang, name='tentang'),
     path('galeri/', views.galeri, name='galeri'),
     path('artikel/', views.daftar_artikel, name='daftar_artikel'),
-    path('<int:pk>/', views.detail_artikel, name='detail_artikel'),
+    path('artikel/<int:pk>/', views.detail_artikel, name='detail_artikel'),
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -27,5 +26,5 @@ urlpatterns = [
     path('auth/login/', views.auth0_login, name='auth0_login'),
     path('auth/callback/', views.auth0_callback, name='auth0_callback'),
     path('auth/logout/', views.auth0_logout, name='auth0_logout'),
-    path('auth/profile/', edit_auth0_profile, name='edit_auth0_profile'),
+    path('tag/<str:tag_name>/', views.artikel_by_tag, name='artikel_by_tag'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)   

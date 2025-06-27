@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Artikel, Category, Komentar
+from .models import Artikel, Category, Komentar, Tag
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.contrib.auth.decorators import login_required
@@ -14,6 +14,8 @@ from urllib.parse import urlencode
 from jose import jwt
 import requests
 from django.conf import settings
+from django.db.models import Count, Q
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -21,19 +23,63 @@ def index(request):
     artikels = Artikel.objects.all()
     artikel_terbaru = Artikel.objects.order_by('-tanggal')[:3]
     articles = Artikel.objects.exclude(gambar_judul='').exclude(gambar_judul=None)
-    return render(request, 'index.html', {
+    return render(request, 'pages/index.html', {
         'artikels': artikels,
         'artikel_terbaru': artikel_terbaru,
         'articles': articles,
     })
 
 def daftar_artikel(request):
-    artikel = Artikel.objects.all().order_by('-tanggal')
-    return render(request, 'artikel_list.html', {'artikel': artikel})
+    from .models import Tag
+    sort = request.GET.get('sort', 'tanggal')
+    order = request.GET.get('order', 'desc')
+    tag_filter = request.GET.get('tag')
+    q = request.GET.get('q', '')
+    artikel = Artikel.objects.all()
+    if tag_filter:
+        artikel = artikel.filter(tags__name=tag_filter)
+    if q:
+        artikel = artikel.filter(Q(judul__icontains=q) | Q(isi__icontains=q))
+    # Sorting hanya tanggal
+    if order == 'asc':
+        artikel = artikel.order_by('tanggal')
+    else:
+        artikel = artikel.order_by('-tanggal')
+    # Pagination
+    paginator = Paginator(artikel, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # Ambil 4 tag terpopuler
+    tags = Tag.objects.annotate(num_artikel=Count('artikels')).order_by('-num_artikel')[:4]
+    sort_options = [
+        {'label': 'Terbaru', 'order': 'desc'},
+        {'label': 'Terlama', 'order': 'asc'},
+    ]
+    return render(request, 'pages/artikel_list.html', {
+        'artikel': page_obj.object_list,
+        'page_obj': page_obj,
+        'tags': tags,
+        'sort_options': sort_options,
+        'selected_order': order,
+        'selected_tag': tag_filter,
+        'q': q,
+    })
 
 def detail_artikel(request, pk):
     artikel = get_object_or_404(Artikel, pk=pk)
+    tags = artikel.tags.all()
+    related = Artikel.objects.filter(tags__in=tags).exclude(pk=artikel.pk).distinct()[:2]
+    populer = Artikel.objects.annotate(num_komentar=Count('komentar')).order_by('-num_komentar', '-tanggal')[:2]
     komentar_list = artikel.komentar.all()
+    # Navigasi prev/next
+    try:
+        prev_artikel = artikel.get_previous_by_tanggal()
+    except Artikel.DoesNotExist:
+        prev_artikel = None
+    try:
+        next_artikel = artikel.get_next_by_tanggal()
+    except Artikel.DoesNotExist:
+        next_artikel = None
     if request.method == 'POST':
         if request.user.is_authenticated:
             isi = request.POST.get('isi')
@@ -45,15 +91,24 @@ def detail_artikel(request, pk):
         else:
             messages.error(request, 'Anda harus login untuk berkomentar.')
             return redirect('login')
-    return render(request, 'detail_artikel.html', {'artikel': artikel, 'komentar_list': komentar_list})
+    return render(request, 'pages/detail_artikel.html', {
+        'artikel': artikel,
+        'related_artikels': related,
+        'populer_artikels': populer,
+        'komentar_list': komentar_list,
+        'prev_artikel': prev_artikel,
+        'next_artikel': next_artikel,
+    })
 
 def tentang(request):
-    return render(request, 'tentang.html')
+    return render(request, 'pages/tentang.html')
 
 def galeri(request):
-    # Get all articles that have title images
     articles_with_images = Artikel.objects.exclude(gambar_judul='').exclude(gambar_judul=None)
-    return render(request, 'galeri.html', {'articles': articles_with_images})
+    paginator = Paginator(articles_with_images, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'pages/galeri.html', {'articles': page_obj.object_list, 'page_obj': page_obj})
 
 User = get_user_model()
 
@@ -119,7 +174,7 @@ def login_view(request):
             return redirect('dashboard')
     else:
         form = EmailLoginForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'pages/login.html', {'form': form})
 
 def register_view(request):
     if request.method == 'POST':
@@ -145,24 +200,16 @@ def dashboard(request):
 def admin_dashboard(request):
     users = User.objects.all()
     artikels = Artikel.objects.all()
-    return render(request, 'admin_dashboard.html', {'users': users, 'artikels': artikels})
+    return render(request, 'admin/admin_dashboard.html', {'users': users, 'artikels': artikels})
 
 @login_required(login_url='login')
 def penulis_dashboard(request):
     artikels = Artikel.objects.filter()
-    return render(request, 'penulis_dashboard.html', {'artikels': artikels})
+    return render(request, 'pages/penulis_dashboard.html', {'artikels': artikels})
 
 @login_required(login_url='login')
 def user_profile(request):
-    if request.method == 'POST':
-        nama_lengkap = request.POST.get('nama_lengkap', '').strip()
-        if nama_lengkap:
-            parts = nama_lengkap.split(' ', 1)
-            request.user.first_name = parts[0]
-            request.user.last_name = parts[1] if len(parts) > 1 else ''
-            request.user.save()
-            messages.success(request, 'Nama berhasil diperbarui.')
-    return render(request, 'user_profile.html')
+    return render(request, 'pages/user_profile.html')
 
 def logout_view(request):
     logout(request)
@@ -236,12 +283,17 @@ def admin_users(request):
             user.delete()
             messages.success(request, 'User berhasil dihapus.')
             return redirect('admin_users')
-    return render(request, 'admin_users.html', {'users': users, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
+    return render(request, 'admin/admin_users.html', {'users': users, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
 
 class ArtikelForm(forms.ModelForm):
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+    )
     class Meta:
         model = Artikel
-        fields = ['judul', 'isi', 'gambar_judul']
+        fields = ['judul', 'isi', 'gambar_judul', 'tags']
         widgets = {
             'judul': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Judul Artikel'}),
             'gambar_judul': forms.FileInput(attrs={'class': 'form-control'}),
@@ -250,6 +302,7 @@ class ArtikelForm(forms.ModelForm):
             'judul': 'Judul',
             'isi': 'Isi',
             'gambar_judul': 'Gambar Judul',
+            'tags': 'Tag',
         }
 
 @login_required(login_url='login')
@@ -283,7 +336,7 @@ def admin_artikels(request):
             artikel.delete()
             messages.success(request, 'Artikel berhasil dihapus.')
             return redirect('admin_artikels')
-    return render(request, 'admin_artikels.html', {'artikels': artikels, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
+    return render(request, 'admin/admin_artikels.html', {'artikels': artikels, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -327,7 +380,7 @@ def admin_categories(request):
             kategori.delete()
             messages.success(request, 'Kategori berhasil dihapus.')
             return redirect('admin_categories')
-    return render(request, 'admin_categories.html', {'categories': categories, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
+    return render(request, 'admin/admin_categories.html', {'categories': categories, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
 
 class KomentarForm(forms.ModelForm):
     class Meta:
@@ -377,7 +430,7 @@ def admin_komentar(request):
             komentar.delete()
             messages.success(request, 'Komentar berhasil dihapus.')
             return redirect('admin_komentar')
-    return render(request, 'admin_komentar.html', {'komentars': komentars, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
+    return render(request, 'admin/admin_komentar.html', {'komentars': komentars, 'form': form, 'edit_form': edit_form, 'edit_id': edit_id, 'add_mode': add_mode})
 
 def auth0_login(request):
     params = {
@@ -412,3 +465,8 @@ def auth0_callback(request):
 def auth0_logout(request):
     request.session.flush()
     return redirect(f'https://{settings.AUTH0_DOMAIN}/v2/logout?client_id={settings.AUTH0_CLIENT_ID}&returnTo=http://localhost:8000/')
+
+def artikel_by_tag(request, tag_name):
+    tag = get_object_or_404(Tag, name=tag_name)
+    artikel = Artikel.objects.filter(tags=tag).order_by('-tanggal')
+    return render(request, 'pages/artikel_list.html', {'artikel': artikel, 'filter_tag': tag})

@@ -1,0 +1,69 @@
+{% extends "pages/base.html" %}
+{% load static %}
+{% block title %}Faza Blog - Beranda{% endblock %}
+{% block content %}
+<div class="page-header" style="margin-top: -3rem;">
+  <div class="content-center">
+    <div class="container">
+      <div class="row align-items-center text-left">
+        <div class="col-lg-6 col-md-8  ml-auto mr-auto">
+          <h1 class="title font-weight-bold">Faza Blog</h1>
+          <p class="description">Temukan inspirasi, motivasi, dan portofolio saya. Bergabunglah dan jadilah bagian dari komunitas pembelajar!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><br><br>
+
+<!-- Sneak Peek Tentang/Portofolio -->
+<div class="container mt-6 mb-6">
+  <h3 class="text-white text-center font-weight-bold mb-4">Tentang Saya</h3>
+  <div class="row align-items-center">
+    <div class="col-md-2 text-center mb-3 mb-md-0">
+      <img src="{% static 'assets/img/profile.jpeg' %}" alt="Foto Profil" class="rounded-circle shadow" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #fff;">
+    </div>
+    <div class="col-md-7">
+      <h4 class="text-white mb-1 font-weight-bold text-center text-md-left">Alief Faza Rizqi Adi Jaya</h4>
+      <p class="text-white-50 mb-2" style="font-size:15px;">Freelance Web Developer & Mahasiswa Informatika UMKT. Berpengalaman di Python, PHP, Laravel, Django, React, dan Vue JS.</p>
+    </div>
+    <div class="col-md-3 text-md-right text-center">
+      <a href="{% url 'tentang' %}" class="btn btn-outline-info">Lihat Portofolio</a>
+    </div>
+  </div>
+</div><br><br><br><br><br><br><br><br><br><br>
+
+<!-- Artikel Terbaru -->
+<div class="container mt-6 mb-6">
+  <h3 class="text-white mb-4 text-center font-weight-bold">Artikel Terbaru</h3>
+  <div class="row">
+    {% for artikel in artikel_terbaru %}
+    <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+      <div class="card w-100">
+        {% if artikel.gambar_judul %}
+        <a href="{% url 'detail_artikel' artikel.pk %}">
+          <div style="position:relative;width:100%;padding-top:56.25%;overflow:hidden;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.13);">
+            <img src="{{ artikel.gambar_judul.url }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" class="img-fluid w-100 h-100" alt="{{ artikel.judul }}">
+          </div>
+        </a>
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ artikel.judul }}</h5>
+          <div class="d-flex justify-content-start align-items-center mb-3 flex-wrap text-start" style="gap: 0.5rem;">
+            <span class="text-muted" style="font-size:1rem;">{{ artikel.tanggal|date:"d F Y" }}</span>
+            <span class="mx-2" style="color:#bbb;font-size:1.2rem;">―</span>
+            <span>
+              {% for tag in artikel.tags.all %}
+                <span style="color:#fff;margin-right:8px;font-size:1rem;">#{{ tag.name }}</span>
+              {% endfor %}
+            </span>
+          </div>
+          <a href="{% url 'detail_artikel' artikel.pk %}" class="btn btn-secondary">Baca Selengkapnya</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center text-muted">Belum ada artikel.</div>
+    {% endfor %}
+  </div>
+</div><br><br><br><br><br><br><br>
+{% endblock %}
