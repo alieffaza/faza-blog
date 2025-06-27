@@ -321,7 +321,10 @@ def admin_artikels(request):
         if 'add' in request.POST:
             form = ArtikelForm(request.POST, request.FILES)
             if form.is_valid():
-                form.save()
+                artikel = form.save(commit=False)
+                artikel.penulis = request.user  # Set penulis ke user yang sedang login
+                artikel.save()
+                form.save_m2m()  # Untuk tags dan relasi many-to-many lain
                 messages.success(request, 'Artikel berhasil ditambahkan.')
                 return redirect('admin_artikels')
         elif 'edit' in request.POST:
