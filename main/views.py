@@ -16,6 +16,7 @@ import requests
 from django.conf import settings
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
+from django.views.decorators.cache import cache_page
 
 # Create your views here.
 
@@ -29,13 +30,14 @@ def index(request):
         'articles': articles,
     })
 
+@cache_page(300)
 def daftar_artikel(request):
     from .models import Tag
     sort = request.GET.get('sort', 'tanggal')
     order = request.GET.get('order', 'desc')
     tag_filter = request.GET.get('tag')
     q = request.GET.get('q', '')
-    artikel = Artikel.objects.all()
+    artikel = Artikel.objects.select_related('penulis', 'category').prefetch_related('tags').all()
     if tag_filter:
         artikel = artikel.filter(tags__name=tag_filter)
     if q:
@@ -65,12 +67,13 @@ def daftar_artikel(request):
         'q': q,
     })
 
+@cache_page(300)
 def detail_artikel(request, pk):
-    artikel = get_object_or_404(Artikel, pk=pk)
+    artikel = get_object_or_404(Artikel.objects.select_related('penulis', 'category').prefetch_related('tags', 'komentar__user'), pk=pk)
     tags = artikel.tags.all()
-    related = Artikel.objects.filter(tags__in=tags).exclude(pk=artikel.pk).distinct()[:2]
-    populer = Artikel.objects.annotate(num_komentar=Count('komentar')).order_by('-num_komentar', '-tanggal')[:2]
-    komentar_list = artikel.komentar.all()
+    related = Artikel.objects.filter(tags__in=tags).exclude(pk=artikel.pk).distinct().select_related('penulis', 'category').prefetch_related('tags')[:2]
+    populer = Artikel.objects.annotate(num_komentar=Count('komentar')).order_by('-num_komentar', '-tanggal').select_related('penulis', 'category').prefetch_related('tags')[:2]
+    komentar_list = artikel.komentar.select_related('user').all()
     # Navigasi prev/next
     try:
         prev_artikel = artikel.get_previous_by_tanggal()
